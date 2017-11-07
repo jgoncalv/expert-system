@@ -53,3 +53,4 @@ def get_parsing():
 if __file__ == 'parse.py':
     input = get_parsing()
     input.print()
+    input.check_logic_format()
