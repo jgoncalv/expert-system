@@ -1,20 +1,8 @@
 #python3
 import sys
 import utils as ut
+import system
 import re
-
-class Input:
-    def __init__(self, rules, ini, ask):
-        self.rules = rules
-        self.ini = ini
-        self.ask = ask
-
-    def print(self):
-        print('rules are:')
-        for rule in self.rules:
-            print('{:s} => {:s}'.format(rule[0], rule[1]))
-        print('TRUE initialized facts: ' + self.ini)
-        print('Are these facts TRUE? ' + self.ask)
 
 def parse_content(content):
     content = [re.sub('\s', '', l) for l in content]
@@ -44,7 +32,7 @@ def parse_content(content):
             rules.append([split[0], split[1]])
     ini = content[i][1:]
     ask = content[i+1][1:]
-    input = Input(rules, ini, ask)
+    input = system.Input(rules, ini, ask)
     return(input)
 
 def get_parsing():
