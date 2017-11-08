@@ -54,6 +54,7 @@ class Input:
                 #unwanted characters before [A-Z]
                 #unwanted characters after [A-Z]
                 #check for brackets order and balance
+                #check if there are all necessary brackets
                 if re.search('[^A-Z()!+|^]', side) != None \
                 or re.search('[(!+|^][+^|]', side) != None \
                 or re.search('[+^|][)+|^]', side) != None \
@@ -67,6 +68,11 @@ class Input:
                     print('For this set of input:')
                     self.print()
                     ut.exit_m('The format of rule {:d} is non logical'.format(i))
+                match = re.search('([+|^])[A-Z]([+|^])', side.replace('!', ''))
+                if match != None and (match.groups()[0] != match.groups()[1] or match.groups()[0] == '^'):
+                    print('For this set of input:')
+                    self.print()
+                    ut.exit_m('missing brackets for rule {:d}'.format(i))
 
     # On récupère et initialise les facts
     def setFacts(self):
