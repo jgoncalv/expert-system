@@ -38,7 +38,6 @@ class Graph:
 		###
 
 
-
 	# On récupère et initialise les facts
 	def setFacts(self):
 		# Les facts true dans ini
