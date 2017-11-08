@@ -129,13 +129,20 @@ class Input:
                 return False
         return True
 
+    #return 0, 1 or 2 according to the current facts
     def compute_condition(self, cond):
+        #if computing fails
+        bckup = cond
+        #replace by current facts
         s = list(cond)
         for i, l in enumerate(s):
             if l >= 'A' and l <= 'Z':
                 s[i] = str(self.facts.get(l))
         cond = "".join(s)
-        while len(cond) > 1:
+        tmp = ''
+        #compute
+        while len(cond) > 1 or tmp == cond:
+            tmp = cond
             while re.search('[012]\+[012]', cond) != None:
                 cond = re.sub('([012])\+([012])', ope.m_and, cond)
             while re.search('[012]\^[012]', cond) != None:
@@ -144,6 +151,9 @@ class Input:
                 cond = re.sub('([012])\|([012])', ope.m_or, cond)
             while re.search('\([012]\)', cond) != None:
                 cond = re.sub('\(([012])\)', r'\1', cond)
+        #error
+        if tmp == cond or (cond != '1' and cond != '2' and cond != '0') :
+            exit_m("could not compute the condition '{:s}'".format(bckup))
         return int(cond)
 
 
