@@ -101,26 +101,53 @@ class Graph:
 			if self.facts[fact.fact] != 1:
 				self.objectivesFacts.append(fact)
 				self.getObjectivesRecursiveRules(fact.rules)
+
+		# On enlève de la liste des objectif les facts qui n'ont pas de rules
+		for fact in self.objectivesFacts:
+			if not fact.rules:
+				self.objectivesFacts.remove(fact)
+
 		# Maintenant qu'on a la liste il faut résoudre les équations de chaque facts en partant du bas de la liste
-		i = len(self.objectivesFacts) - 1
-		while (i >= 0):
-			for rule in self.objectivesFacts[i].rules:
+		#
+		# /!\ MESSAGE : Il faut faire tourner en boucle dans la liste d'objectif pour résoudre les équations et trouvé au moins 1 true
+		# En suite si on le trouve on l'enlève de la liste
+		#
 
+		while (self.objectivesFacts):
+			for x in self.objectivesFacts:
+				print(x.fact)
+			print("")
+			i = len(self.objectivesFacts) - 1
+			while (i >= 0):
+				if self.resolve(self.objectivesFacts[i]) == 1:
+					# On a trouvé un true donc on recommence du début
+					i = len(self.objectivesFacts) - 1
+				elif i == 0:
+					l = len(self.objectivesFacts) - 1
+					# Comme on a pas trouvé de solution on supprime le dernier fact de la liste
+					self.objectivesFacts.remove(self.objectivesFacts[l])
+				else:
+					i -= 1
 
-
-
-				### JEAN SOUI ICI
-				###
-
+###
+### JEAN SOUI ICI
+###
+	def resolve(self, fact):
+		for rule in fact.rules:
+			if len(rule.rule[1]) > 1:
+				print("Plus d'un facts impliqué il faut faire des vérifications")
+			else:
+				# on exécute les rule jusqu'à avoir true
 				res = self.compute_condition(rule.rule[0])
-				print(res)
+				if res == 1:
+					self.facts[fact.fact] = 1
+					self.objectivesFacts.remove(fact)
+					return 1
+		return 0
 
-				####
-				####
-
-
-
-			i -= 1
+###
+### FIN JEAN SOUI ICI
+###
 		
 	def getObjectivesRecursiveRules(self, rules):
 		for rule in rules:
@@ -157,7 +184,7 @@ class Graph:
 			while re.search('\([012]\)', cond) != None:
 				cond = re.sub('\(([012])\)', r'\1', cond)
 		#error
-		if tmp == cond or (cond != '1' and cond != '2' and cond != '0') :
+		if tmp == cond or (cond != '1' and cond != '2' and cond != '0'):
 			exit_m("could not compute the condition '{:s}'".format(bckup))
 		return int(cond)
 
@@ -166,7 +193,15 @@ class Graph:
 	MAIN DE TEST
 """
 def main():
-	graph = Graph([['A|B+C', 'E'], ['(F|G)+H', 'E']], 'BC', 'E')
+	graph = Graph([['B+C', 'A'], ['D^E', 'B'], ['B', 'C']], 'D', 'A')
+	for q in graph.queries:
+		res = graph.facts[q]
+		if res == 1:
+			print("{} is true".format(q))
+		elif res == 0:
+			print("{} is false".format(q))
+		else:
+			print("{} is undetermined".format(q))
 
 if __name__ == '__main__':
 	main()
