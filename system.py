@@ -1,6 +1,7 @@
 import re
 import sys
 import utils as ut
+import ope
 
 # Class de noeud contient la lettre du fait et les rules qui lui sont appliqués.
 # Les noeuds suivant sont ceux les facts qui se trouvent dans la premières parties des rules.
@@ -128,12 +129,32 @@ class Input:
                 return False
         return True
 
+    def compute_condition(self, cond):
+        s = list(cond)
+        for i, l in enumerate(s):
+            if l >= 'A' and l <= 'Z':
+                s[i] = str(self.facts.get(l))
+        cond = "".join(s)
+        while len(cond) > 1:
+            while re.search('[012]\+[012]', cond) != None:
+                cond = re.sub('([012])\+([012])', ope.m_and, cond)
+            while re.search('[012]\^[012]', cond) != None:
+                cond = re.sub('([012])\^([012])', ope.m_xor, cond)
+            while re.search('[012]\|[012]', cond) != None:
+                cond = re.sub('([012])\|([012])', ope.m_or, cond)
+            while re.search('\([012]\)', cond) != None:
+                cond = re.sub('\(([012])\)', r'\1', cond)
+        return int(cond)
+
 
 def main():
-    input = Input([ ['A', 'B'], ['C', 'D']], 'ABD', 'HD')
+    import parse as prs
+    input = prs.get_parsing()
+    input.print()
+    input.check_logic_format()
     input.check_logic_format()
     input.setFacts()
-    input.backwardChaining()
-
+    input.compute_condition('(A+B+F+H)|C+D')
+    #input.backwardChaining()
 if __name__ == '__main__':
-    main()	
+    main()
