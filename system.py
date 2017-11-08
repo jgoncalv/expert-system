@@ -68,11 +68,6 @@ class Input:
                     print('For this set of input:')
                     self.print()
                     ut.exit_m('The format of rule {:d} is non logical'.format(i))
-                match = re.search('([+|^])[A-Z]([+|^])', side.replace('!', ''))
-                if match != None and (match.groups()[0] != match.groups()[1] or match.groups()[0] == '^'):
-                    print('For this set of input:')
-                    self.print()
-                    ut.exit_m('missing brackets for rule {:d}'.format(i))
 
     # On récupère et initialise les facts
     def setFacts(self):
