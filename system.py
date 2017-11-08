@@ -70,15 +70,15 @@ class Input:
 
     # On récupère et initialise les facts
     def setFacts(self):
-#TB : I would do that
-"""
+        #TB : I would do that
+        """
         letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
         for l in letters:
             self.facts[l] = 0
 
         for l in self.ini:
             self.facts[l] = 1
-"""
+        """
         # Les facts true dans ini
         for c in self.ini:
             if c not in self.facts:
@@ -107,7 +107,6 @@ class Input:
         dic = {}
         for key in self.facts.keys():
             dic[key] = [x for x in self.rules if key in x[1]]
-        
         # On créer la node pour chaque lettre
         for key, lst in dic.items():
            nodeList.append(Node(key, lst))
@@ -139,7 +138,6 @@ class Input:
 
 def main():
     input = Input([ ['A', 'B'], ['C', 'D']], 'ABD', 'HD')
-    input.print()
     input.check_logic_format()
     input.setFacts()
     input.backwardChaining()
