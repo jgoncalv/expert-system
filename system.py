@@ -29,6 +29,16 @@ class Input:
     def check_logic_format(self):
         for i, rule in enumerate(self.rules):
             for side in rule:
+                #no unwanted character
+                #unwanted characters before '+^|'
+                #unwanted characters after '+^|'
+                #unwanted first characters
+                #unwanted last characters
+                #unwanted characters before '!'
+                #unwanted characters after '!'
+                #unwanted characters before [A-Z]
+                #unwanted characters after [A-Z]
+                #check for brackets order and balance
                 if re.search('[^A-Z()!+|^]', side) != None \
                 or re.search('[(!+|^][+^|]', side) != None \
                 or re.search('[+^|][)+|^]', side) != None \
@@ -36,6 +46,8 @@ class Input:
                 or re.search('[!+^|]$', side) != None \
                 or re.search('[A-Z)]!', side) != None \
                 or re.search('![)+|^!]', side) != None \
+                or re.search('[)A-Z][A-Z]', side) != None \
+                or re.search('[A-Z][!(A-Z]', side) != None \
                 or self.check_brackets(side) == False:
                     print('For this set of input:')
                     self.print()

@@ -5,33 +5,67 @@ import system
 import re
 
 def parse_content(content):
+    #get rid of whitespace characters
     content = [re.sub('\s', '', l) for l in content]
+    #get rid of comments
     content = [l.split('#')[0] for l in content if l and l[0] != '#']
     rules = []
+    tmp = -1
     for i, line in enumerate(content):
-        if line[0] == '=':
+        #loop until initialization of facts or questions
+        if line[0] == '=' or line[0] == '?':
             tmp = i
             break
+        #check unvalid characters
         match = re.search('[^A-Z()!+|^=<>]', line)
         if match != None:
             ut.exit_m("invalid character '{:s}' on line {:d}".format(match.group(), i + 1))
-        if line.count('=>') == 0:
-            ut.exit_m("No '=>' sign on line {:d}".format(i + 1))
-        if line.count('=>') > 1:
-            ut.exit_m("too many '=>' signs on line {:d}".format(i+1))
-        split = line.split('=>')
-        if len(split) != 2 or split[0] == '' or split[1] == '':
-            ut.exit_m("arguments missing on line {:d}".format(i+1))
-        if re.search('<', line) != None and re.search('<=>', line) == None:
-            ut.exit_m("Misplaced '<' on line {:d}".format(i+1))
-        if '<=>' in line:
-            split = line.split('<=>')
-            rules.append([split[0], split[1]])
-            rules.append([split[1], split[0]])
+        #select which 'then' sign 
+        if line.count('<=>') > 0:
+            sign = '<=>'
         else:
-            rules.append([split[0], split[1]])
-    ini = content[i][1:]
-    ask = content[i+1][1:]
+            sign = '=>'
+        #check if no 'then' sign
+        if line.count(sign) == 0:
+            ut.exit_m("No '=>' sign on line {:d}".format(i+1))
+        split = line.split(sign)
+        #check if too many 'then' sign
+        if len(split) > 2:
+            ut.exit_m("too many '{:s}' on line {:d}".format(i+1))
+        #check before and after 'then' sign
+        if split[0] == '' or split[1] == '':
+            ut.exit_m("arguments missing on line {:d}".format(i+1))
+        #check for characters of the 'then' sign in arguments
+        for s in split:
+            if re.search('[<=>]', s) != None:
+                ut.exit_m("unwanted character on line {:d}".format(i+1))
+        #append the rules
+        rules.append([split[0], split[1]])
+        #two rules in this case
+        if sign == '<=>':
+            rules.append([split[1], split[0]])
+    #case of no initialization and questions
+    ini = ''
+    ask = ''
+    if tmp > -1:
+        #if there is an initialization line
+        if content[tmp][0] == '=':
+            ini = content[tmp][1:]
+            if re.search('[^A-Z]', ini) != None:
+                ut.exit_m("unwanted character on the initialization line")
+            if len(content) > tmp + 2:
+                ut.exit_m("too many lines after initialization")
+            if len(content) == tmp + 2:
+                tmp += 1
+                if content[tmp][0] != '?':
+                    ut.exit_m("you must ask a question after initialization")
+        #if there is a question line
+        if content[tmp][0] == '?':
+            ask = content[tmp][1:]
+            if re.search('[^A-Z]', ask) != None:
+                ut.exit_m("unwanted character on the question line")
+            if len(content) != tmp +1:
+                ut.exit_m("the question line should be the last line of input")
     input = system.Input(rules, ini, ask)
     return(input)
 
@@ -42,12 +76,16 @@ def get_parsing():
         ut.exit_m('too many arguments')
     try:
         with open(sys.argv[1], 'r') as f:
+            #list line by line
             content = f.readlines()
     except FileNotFoundError:
         ut.exit_m('No such file: "' + sys.argv[1] +'"')
     except IsADirectoryError:
         ut.exit_m('Is a directory: "' + sys.argv[1] +'"')
     input = parse_content(content)
+    if len(input.rules) == 0:
+        if len(input.ask) == 0:
+            ut.exit_m('you should ask a question about facts')
     return(input)
 
 if __file__ == 'parse.py':
