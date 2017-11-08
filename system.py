@@ -70,6 +70,15 @@ class Input:
 
     # On récupère et initialise les facts
     def setFacts(self):
+#TB : I would do that
+"""
+        letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        for l in letters:
+            self.facts[l] = 0
+
+        for l in self.ini:
+            self.facts[l] = 1
+"""
         # Les facts true dans ini
         for c in self.ini:
             if c not in self.facts:
