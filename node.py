@@ -114,11 +114,8 @@ class Graph:
 		#
 
 		while (self.objectivesFacts):
-			for x in self.objectivesFacts:
-				print(x.fact)
-			print("")
 			i = len(self.objectivesFacts) - 1
-			while (i >= 0):
+			while (i >= 0 and self.objectivesFacts):
 				if self.resolve(self.objectivesFacts[i]) == 1:
 					# On a trouvé un true donc on recommence du début
 					i = len(self.objectivesFacts) - 1
@@ -193,7 +190,7 @@ class Graph:
 	MAIN DE TEST
 """
 def main():
-	graph = Graph([['B+C', 'A'], ['D^E', 'B'], ['B', 'C']], 'D', 'A')
+	graph = Graph([['B', 'A'], ['C', 'A']], '', 'A')
 	for q in graph.queries:
 		res = graph.facts[q]
 		if res == 1:
