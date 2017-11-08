@@ -10,6 +10,7 @@ class Node:
         self.rules = rules
         self.nextNodes = []
 
+
 # Class de ce que l'on reçoit en entré
 class Input:
     def __init__(self, rules, ini, ask):
@@ -85,27 +86,40 @@ class Input:
         # Les facts False dans ask
         for c in self.ask:
             if c not in self.facts:
-                self.facts[c] = 0    
+                self.facts[c] = 0
 
 
     # Algo de backward chaining, on utilise une liste de noeud de facts
     def backwardChaining(self):
-        
-        # Node list contient toutes les nodes
+
+        # Liste de Node contient toutes les nodes
         nodeList = []
 
         # On récupère les rules pour chaque lettre
         dic = {}
         for key in self.facts.keys():
             dic[key] = [x for x in self.rules if key in x[1]]
-        print(dic)
+
         # On créer la node pour chaque lettre
         for key, lst in dic.items():
            nodeList.append(Node(key, lst))
 
         # On relie les nodes entre elles selon les rules
         self.graph = self.linkNodes(nodeList)
-        print(self.graph)
+
+
+        self.resolve()
+
+
+    def resolve(self):
+        
+        for querie in self.ask:
+            for node in self.graph:
+                if node.lettre is querie:
+                    
+
+        
+
 
     def linkNodes(self, nodeList):
         # On parcours la liste de noeuds
@@ -135,4 +149,4 @@ def main():
     input.backwardChaining()
 
 if __name__ == '__main__':
-    main()	
+    main()
