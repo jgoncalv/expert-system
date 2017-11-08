@@ -1,5 +1,6 @@
 import re
 import sys
+import utils as ut
 
 # Class de noeud contient la lettre du fait et les rules qui lui sont appliqués.
 # Les noeuds suivant sont ceux les facts qui se trouvent dans la premières parties des rules.
@@ -18,18 +19,54 @@ class Input:
         self.facts = {}
         self.graph = []
 
+    #print the rules, initialization and question of the input
     def print(self):
         print('rules are:')
-        for rule in self.rules:
-            print('{:s} => {:s}'.format(rule[0], rule[1]))
+        for i, rule in enumerate(self.rules):
+            print("#{:d}\t{:s} => {:s}".format(i, rule[0], rule[1]))
         print('TRUE initialized facts: ' + self.ini)
         print('Are these facts TRUE? ' + self.ask)
 
-    def check(self):
-        for rule in rules:
-            if len(rule) != 2:
-                exit_m('error in parsing')
+    #check the order and balance of brackets
+    def check_brackets(self, side):
+        br = []
+        for i, l in enumerate(side):
+            if l == '(':
+                br.append(i)
+            elif l == ')':
+                if len(br) == 0:
+                    return False
+                else:
+                    br.pop()
+        return len(br) == 0
 
+    #check the logic format of operators and brackets
+    def check_logic_format(self):
+        for i, rule in enumerate(self.rules):
+            for side in rule:
+                #no unwanted character
+                #unwanted characters before '+^|'
+                #unwanted characters after '+^|'
+                #unwanted first characters
+                #unwanted last characters
+                #unwanted characters before '!'
+                #unwanted characters after '!'
+                #unwanted characters before [A-Z]
+                #unwanted characters after [A-Z]
+                #check for brackets order and balance
+                if re.search('[^A-Z()!+|^]', side) != None \
+                or re.search('[(!+|^][+^|]', side) != None \
+                or re.search('[+^|][)+|^]', side) != None \
+                or re.search('^[+^|]', side) != None \
+                or re.search('[!+^|]$', side) != None \
+                or re.search('[A-Z)]!', side) != None \
+                or re.search('![)+|^!]', side) != None \
+                or re.search('[)A-Z][A-Z]', side) != None \
+                or re.search('[A-Z][!(A-Z]', side) != None \
+                or self.check_brackets(side) == False:
+                    print('For this set of input:')
+                    self.print()
+                    ut.exit_m('The format of rule {:d} is non logical'.format(i))
 
     # On récupère et initialise les facts
     def setFacts(self):
@@ -93,10 +130,10 @@ class Input:
 
 def main():
     input = Input([ ['A', 'B'], ['C', 'D']], 'ABD', 'HD')
+    input.print()
+    input.check_logic_format()
     input.setFacts()
     input.backwardChaining()
-
-
 
 if __name__ == '__main__':
     main()	
