@@ -20,6 +20,8 @@ def parse_content(content):
         match = re.search('[^A-Z()!+|^=<>]', line)
         if match != None:
             ut.exit_m("invalid character '{:s}' on line {:d}".format(match.group(), i + 1))
+        if re.search('!!', line) != None:
+            ut.exit_m("do not put successive '!' on line {:d}".format(i+1))
         #select which 'then' sign 
         if line.count('<=>') > 0:
             sign = '<=>'

@@ -1,6 +1,7 @@
 import re
 import sys
 import utils as ut
+import ope
 
 # Class de noeud contient la lettre du fait et les rules qui lui sont appliqués.
 # Les noeuds suivant sont ceux les facts qui se trouvent dans la premières parties des rules.
@@ -55,6 +56,7 @@ class Input:
                 #unwanted characters before [A-Z]
                 #unwanted characters after [A-Z]
                 #check for brackets order and balance
+                #check if there are all necessary brackets
                 if re.search('[^A-Z()!+|^]', side) != None \
                 or re.search('[(!+|^][+^|]', side) != None \
                 or re.search('[+^|][)+|^]', side) != None \
@@ -141,12 +143,42 @@ class Input:
                 return False
         return True
 
+    #return 0, 1 or 2 according to the current facts
+    def compute_condition(self, cond):
+        #if computing fails
+        bckup = cond
+        #replace by current facts
+        s = list(cond)
+        for i, l in enumerate(s):
+            if l >= 'A' and l <= 'Z':
+                s[i] = str(self.facts.get(l))
+        cond = "".join(s)
+        tmp = ''
+        #compute
+        while len(cond) > 1 or tmp == cond:
+            tmp = cond
+            while re.search('[012]\+[012]', cond) != None:
+                cond = re.sub('([012])\+([012])', ope.m_and, cond)
+            while re.search('[012]\^[012]', cond) != None:
+                cond = re.sub('([012])\^([012])', ope.m_xor, cond)
+            while re.search('[012]\|[012]', cond) != None:
+                cond = re.sub('([012])\|([012])', ope.m_or, cond)
+            while re.search('\([012]\)', cond) != None:
+                cond = re.sub('\(([012])\)', r'\1', cond)
+        #error
+        if tmp == cond or (cond != '1' and cond != '2' and cond != '0') :
+            exit_m("could not compute the condition '{:s}'".format(bckup))
+        return int(cond)
+
 
 def main():
-    input = Input([ ['A', 'B'], ['C', 'D']], 'ABD', 'HD')
+    import parse as prs
+    input = prs.get_parsing()
+    input.print()
+    input.check_logic_format()
     input.check_logic_format()
     input.setFacts()
-    input.backwardChaining()
-
+    input.compute_condition('(A+B+F+H)|C+D')
+    #input.backwardChaining()
 if __name__ == '__main__':
     main()
