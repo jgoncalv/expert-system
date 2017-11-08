@@ -29,7 +29,7 @@ class Graph:
 		self.graph = []
 		self.ruleNodes = []
 		self.factNodes = []
-		self.objectifsFacts = []
+		self.objectivesFacts = []
 
 		### On Créer le Graphe
 		self.setFacts()
@@ -99,12 +99,12 @@ class Graph:
 	def backwardChaining(self):
 		for fact in self.graph:
 			if self.facts[fact.fact] != 1:
-				self.objectifsFacts.append(fact)
-				self.evaluateAllRules(fact.rules)
+				self.objectivesFacts.append(fact)
+				self.getObjectivesRecursiveRules(fact.rules)
 		# Maintenant qu'on a la liste il faut résoudre les équations de chaque facts en partant du bas de la liste
-		i = len(self.objectifsFacts) - 1
+		i = len(self.objectivesFacts) - 1
 		while (i >= 0):
-			for rule in self.objectifsFacts[i].rules:
+			for rule in self.objectivesFacts[i].rules:
 
 
 
@@ -122,17 +122,17 @@ class Graph:
 
 			i -= 1
 		
-	def evaluateAllRules(self, rules):
+	def getObjectivesRecursiveRules(self, rules):
 		for rule in rules:
-			self.evaluateAllFacts(rule.firstFacts)
-			self.evaluateAllFacts(rule.secondFacts)
+			self.getObjectivesRecursiveFacts(rule.firstFacts)
+			self.getObjectivesRecursiveFacts(rule.secondFacts)
 
-	def evaluateAllFacts(self, facts):
+	def getObjectivesRecursiveFacts(self, facts):
 		for fact in facts:
 			if self.facts[fact.fact] != 1:
-				if fact not in self.objectifsFacts:
-					self.objectifsFacts.append(fact)
-					self.evaluateAllRules(fact.rules)
+				if fact not in self.objectivesFacts:
+					self.objectivesFacts.append(fact)
+					self.getObjectivesRecursiveRules(fact.rules)
 
 	#return 0, 1 or 2 according to the current facts
 	def compute_condition(self, cond):
