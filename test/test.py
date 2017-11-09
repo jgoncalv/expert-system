@@ -56,4 +56,4 @@ for arg in args:
             print("{:s} : \033[31mKO\033[0m".format(arg))
     else:
         print("File '{:s}' not found".format(arg))
-    print("\n[{:d}/{:d}] tests passed".format(ok, len(args)))
+print("\n[{:d}/{:d}] tests passed".format(ok, len(args)))
