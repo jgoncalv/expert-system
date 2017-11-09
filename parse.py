@@ -1,5 +1,4 @@
 #python3
-import sys
 import utils as ut
 import system
 import re
@@ -71,19 +70,19 @@ def parse_content(content):
     input = system.Input(rules, ini, ask)
     return(input)
 
-def get_parsing():
-    if len(sys.argv) == 1:
+def get_parsing(argv):
+    if len(argv) == 1:
         ut.exit_m('put text file as argument')
-    elif len(sys.argv) > 2:
+    elif len(argv) > 2:
         ut.exit_m('too many arguments')
     try:
-        with open(sys.argv[1], 'r') as f:
+        with open(argv[1], 'r') as f:
             #list line by line
             content = f.readlines()
     except FileNotFoundError:
-        ut.exit_m('No such file: "' + sys.argv[1] +'"')
+        ut.exit_m('No such file: "' + argv[1] +'"')
     except IsADirectoryError:
-        ut.exit_m('Is a directory: "' + sys.argv[1] +'"')
+        ut.exit_m('Is a directory: "' + argv[1] +'"')
     input = parse_content(content)
     if len(input.rules) == 0:
         if len(input.ask) == 0:
