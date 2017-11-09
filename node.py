@@ -152,29 +152,37 @@ class Graph:
                 if factNode.fact is querie:
                     self.graph.append(factNode)
 
-
-    # Permet de réaliser une liste d'objectif selon si un noeud fact est true ou non
-    # et tente de résoudre les rules en prenant en compte 
+    # Vérifie si il n'est pas déjà dans la liste et l'ajoute
+    def addNodeCheck(self, fact):
+        for n in self.nodeChecked:
+            if n is not fact:
+                self.nodeChecked.append(fact)
+    '''
+        Permet de réaliser une liste d'objectif selon si un noeud fact est true ou non
+        et tente de résoudre les rules en prenant en compte 
+    '''
     def backwardChaining(self):
+
+        # On rajoute les facts true dans nodeChecked
+        for fact in self.factNodes:
+            if self.facts[fact.fact] == 1:
+                self.addNodeCheck(fact)
+
+        # On rajoute les nouveau objectifs récursivement
         for fact in self.graph:
             if self.facts[fact.fact] != 1:
                 self.objectivesFacts.append(fact)
                 self.getObjectivesRecursiveRules(fact.rules)
             else:
-                self.nodeChecked.append(fact)
+                self.addNodeCheck(fact)
 
         # On enlève de la liste des objectif les facts qui n'ont pas de rules
         for fact in self.objectivesFacts:
             if not fact.rules:
                 self.objectivesFacts.remove(fact)
-                self.nodeChecked.append(fact)
+                self.addNodeCheck(fact)
 
         # Maintenant qu'on a la liste il faut résoudre les équations de chaque facts en partant du bas de la liste
-        #
-        # /!\ MESSAGE : Il faut faire tourner en boucle dans la liste d'objectif pour résoudre les équations et trouvé au moins 1 true
-        # En suite si on le trouve on l'enlève de la liste
-        #
-
         while (self.objectivesFacts):
             i = len(self.objectivesFacts) - 1
             while (i >= 0 and self.objectivesFacts):
@@ -185,7 +193,7 @@ class Graph:
                     # Comme on a pas trouvé de solution on supprime le dernier fact de la liste
                     l = len(self.objectivesFacts) - 1
                     f = self.objectivesFacts[l]
-                    self.nodeChecked.append(f)
+                    self.addNodeCheck(f)
                     self.objectivesFacts.remove(f)
                 else:
                     i -= 1
