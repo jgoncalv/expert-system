@@ -197,7 +197,7 @@ class Graph:
             for fact in self.factNodes:
                 if fact.fact is k:
                     if fact not in self.nodeChecked:
-                        print("Il y a des noeuds qui ne sont pas demandés mais qu'ils faut vérifier")
+                        print("Il y a des noeuds qui ne sont pas demandés mais qu'ils faut vérifier : ", end='')
                         print(fact.fact)
         """
             FIN DU TAFF

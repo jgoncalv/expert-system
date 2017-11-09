@@ -37,6 +37,7 @@ if len(sys.argv) == 1:
     exit_m("put test file as argument, you can use wildcard '*' to run a battery of tests like 'and_*' or use '*.test' to run all tests")
 args = sys.argv[1:]
 print()
+ok = 0
 for arg in args:
     if os.path.isfile(arg):
         h = '\033[33m#####\033[0m {:s} \033[33m#####\033[0m'.format(arg)
@@ -47,10 +48,12 @@ for arg in args:
         output = output.decode("utf-8")
         print(output, end='')
         print('\033[33m{:s}\033[0m'.format((len(h) - 18) * '#'))
-        if check_solution(arg, output) == 1:
+        test = check_solution(arg, output)
+        if test == 1:
             print("\033[32mOK\033[0m")
+            ok += 1
         else:
-            print("\033[31mKO\033[0m")
+            print("{:s} : \033[31mKO\033[0m".format(arg))
     else:
         print("File '{:s}' not found".format(arg))
-    print()
+print("\n[{:d}/{:d}] tests passed".format(ok, len(args)))
