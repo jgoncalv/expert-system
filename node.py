@@ -30,6 +30,13 @@ class Graph:
         self.ruleNodes = []
         self.factNodes = []
         self.objectivesFacts = []
+        self.nodeChecked = []
+
+
+        ### Vérification
+        self.check_logic_format()
+        ###
+
 
         ### On Créer le Graphe
         self.setFacts()
@@ -41,6 +48,58 @@ class Graph:
         ### On éxecute le backwar chaining
         self.backwardChaining()
         ###
+
+
+
+    #print the rules, initialization and question of the input
+    def display(self):
+        print('rules are:')
+        for i, rule in enumerate(self.rules):
+            print("#{:d}\t{:s} => {:s}".format(i, rule[0], rule[1]))
+        print('TRUE initialized facts: ' + self.initial)
+        print('Are these facts TRUE? ' + self.queries)
+
+    #check the order and balance of brackets
+    def check_brackets(self, side):
+        br = []
+        for i, l in enumerate(side):
+            if l == '(':
+                br.append(i)
+            elif l == ')':
+                if len(br) == 0:
+                    return False
+                else:
+                    br.pop()
+        return len(br) == 0
+
+    #check the logic format of operators and brackets
+    def check_logic_format(self):
+        for i, rule in enumerate(self.rules):
+            for side in rule:
+                #no unwanted character
+                #unwanted characters before '+^|'
+                #unwanted characters after '+^|'
+                #unwanted first characters
+                #unwanted last characters
+                #unwanted characters before '!'
+                #unwanted characters after '!'
+                #unwanted characters before [A-Z]
+                #unwanted characters after [A-Z]
+                #check for brackets order and balance
+                #check if there are all necessary brackets
+                if re.search('[^A-Z()!+|^]', side) != None \
+                or re.search('[(!+|^][+^|]', side) != None \
+                or re.search('[+^|][)+|^]', side) != None \
+                or re.search('^[+^|]', side) != None \
+                or re.search('[!+^|]$', side) != None \
+                or re.search('[A-Z)]!', side) != None \
+                or re.search('![)+|^!]', side) != None \
+                or re.search('[)A-Z][A-Z]', side) != None \
+                or re.search('[A-Z][!(A-Z]', side) != None \
+                or self.check_brackets(side) == False:
+                    print('For this set of input:')
+                    self.display()
+                    ut.exit_m('The format of rule {:d} is non logical'.format(i))
 
 
 
@@ -101,11 +160,15 @@ class Graph:
             if self.facts[fact.fact] != 1:
                 self.objectivesFacts.append(fact)
                 self.getObjectivesRecursiveRules(fact.rules)
+            else:
+                self.nodeChecked.append(fact)
 
         # On enlève de la liste des objectif les facts qui n'ont pas de rules
         for fact in self.objectivesFacts:
             if not fact.rules:
                 self.objectivesFacts.remove(fact)
+                self.nodeChecked.append(fact)
+
 
         # Maintenant qu'on a la liste il faut résoudre les équations de chaque facts en partant du bas de la liste
         #
@@ -120,15 +183,31 @@ class Graph:
                     # On a trouvé un true donc on recommence du début
                     i = len(self.objectivesFacts) - 1
                 elif i == 0:
-                    l = len(self.objectivesFacts) - 1
                     # Comme on a pas trouvé de solution on supprime le dernier fact de la liste
-                    self.objectivesFacts.remove(self.objectivesFacts[l])
+                    l = len(self.objectivesFacts) - 1
+                    f = self.objectivesFacts[l]
+                    self.nodeChecked.append(f)
+                    self.objectivesFacts.remove(f)
                 else:
                     i -= 1
+        """
+            ICI IL Y A DU TAFF
+        """
+        # On regarde tous les facts pour savoir si il y en a qui n'ont pas été vérifier
+        for k in self.facts.keys():
+            for fact in self.factNodes:
+                if fact.fact is k:
+                    if fact not in self.nodeChecked:
+                        print("Il y a des noeuds qui ne sont pas demandés mais qu'ils faut vérifier")
+                        print(fact.fact)
+        """
+            FIN DU TAFF
+        """
 
 ###
 ### JEAN SOUI ICI
 ###
+
     def resolve(self, fact):
         for rule in fact.rules:
             if len(rule.rule[1]) > 1:
@@ -170,8 +249,10 @@ class Graph:
         cond = "".join(s)
         tmp = ''
         #compute
-        while len(cond) > 1 or tmp == cond:
+        while len(cond) > 1 and tmp != cond:
             tmp = cond
+            while re.search('![012]', cond) != None:
+                cond = re.sub('!([012])', ope.m_neg, cond)
             while re.search('[012]\+[012]', cond) != None:
                 cond = re.sub('([012])\+([012])', ope.m_and, cond)
             while re.search('[012]\^[012]', cond) != None:
@@ -181,8 +262,8 @@ class Graph:
             while re.search('\([012]\)', cond) != None:
                 cond = re.sub('\(([012])\)', r'\1', cond)
         #error
-        if tmp == cond or (cond != '1' and cond != '2' and cond != '0'):
-            exit_m("could not compute the condition '{:s}'".format(bckup))
+        if tmp == cond or (cond != '1' and cond != '2' and cond != '0') :
+            ut.exit_m("could not compute the condition '{:s}'".format(bckup))
         return int(cond)
 
 
