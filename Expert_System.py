@@ -1,13 +1,12 @@
 import parse
-import system
-import node
+from node import Graph
 import sys
 
-def test_compute_condition(input):
+def test_compute_condition(graph):
     print("intermediary results:")
-    for rule in input.rules:
+    for rule in graph.rules:
         cond = rule[0]
-        result = input.compute_condition(cond)
+        result = graph.compute_condition(cond)
         print("{:s}\t= {:d}".format(cond, result))
 
 def ini_options(argv):
@@ -23,18 +22,21 @@ def ini_options(argv):
                     print("unknow option '{:s}'".format(l))
     return [arg for arg in argv if arg[0] != '-']
 
-argv = ini_options(sys.argv)
-input = parse.get_parsing(argv)
-input.check_logic_format()
-input.setFacts()
-if OPT_T == 1:
-    test_compute_condition(input)
-graph = node.Graph(input.rules, input.ini, input.ask)
-for q in graph.queries:
-    res = graph.facts[q]
-    if res == 1:
-        print("{} is true".format(q))
-    elif res == 0:
-        print("{} is false".format(q))
-    else:
-        print("{} is undetermined".format(q))
+
+def main():
+    argv = ini_options(sys.argv)
+    rules, inital, queries = parse.get_parsing(argv)
+    graph = Graph(rules, initial, queries)
+    if OPT_T == 1:
+        test_compute_condition(graph)
+    for q in graph.queries:
+        res = graph.facts[q]
+        if res == 1:
+            print("{} is true".format(q))
+        elif res == 0:
+            print("{} is false".format(q))
+        else:
+            print("{} is undetermined".format(q))
+
+if __name__ == '__main__':
+    main()

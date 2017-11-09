@@ -1,7 +1,7 @@
 #python3
 import utils as ut
-import system
 import re
+from node import Graph
 
 def parse_content(content):
     #get rid of whitespace characters
@@ -67,8 +67,7 @@ def parse_content(content):
                 ut.exit_m("unwanted character on the question line")
             if len(content) != tmp +1:
                 ut.exit_m("the question line should be the last line of input")
-    input = system.Input(rules, ini, ask)
-    return(input)
+    return rules, ini, ask
 
 def get_parsing(argv):
     if len(argv) == 1:
