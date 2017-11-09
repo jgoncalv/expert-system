@@ -161,13 +161,6 @@ class Input:
             ut.exit_m("could not compute the condition '{:s}'".format(bckup))
         return int(cond)
 
-def test_compute_condition(input):
-    print("intermediary results:")
-    for rule in input.rules:
-        cond = rule[0]
-        result = input.compute_condition(cond)
-        print("{:s}\t= {:d}".format(cond, result))
-
 def main():
     import parse as prs
     input = prs.get_parsing()
