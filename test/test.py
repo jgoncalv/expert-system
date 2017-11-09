@@ -42,7 +42,7 @@ for arg in args:
     if os.path.isfile(arg):
         h = '\033[33m#####\033[0m {:s} \033[33m#####\033[0m'.format(arg)
         print(h)
-        subprocess.run(["cat", arg])
+        #subprocess.run(["cat", arg])
         print()
         output = subprocess.check_output(["python3", "../Expert_System.py", arg])
         output = output.decode("utf-8")
