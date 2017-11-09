@@ -31,6 +31,15 @@ def m_xor(match):
     if x == '1' or y == '1':
 	    return '1'
 
+def m_neg(match):
+    x = match.groups()[0]
+    if x == '1':
+        return '0'
+    if x == '0':
+        return '1'
+    if x == '2':
+        return '2'
+
 def AND(x, y):
     if x == 0 or y == 0:
 	    return 0

@@ -93,36 +93,25 @@ class Input:
 
     # Algo de backward chaining, on utilise une liste de noeud de facts
     def backwardChaining(self):
-
         # Liste de Node contient toutes les nodes
         nodeList = []
-
         # On récupère les rules pour chaque lettre
         dic = {}
         for key in self.facts.keys():
             dic[key] = [x for x in self.rules if key in x[1]]
-
         # On créer la node pour chaque lettre
         for key, lst in dic.items():
            nodeList.append(Node(key, lst))
-
         # On relie les nodes entre elles selon les rules
         self.graph = self.linkNodes(nodeList)
-
-
         self.resolve()
 
-
     def resolve(self):
-        
         for querie in self.ask:
             for node in self.graph:
                 if node.lettre is querie:
+                    print("not ready yet")
                     
-
-        
-
-
     def linkNodes(self, nodeList):
         # On parcours la liste de noeuds
         for node in nodeList:
@@ -155,8 +144,10 @@ class Input:
         cond = "".join(s)
         tmp = ''
         #compute
-        while len(cond) > 1 or tmp == cond:
+        while len(cond) > 1 and tmp != cond:
             tmp = cond
+            while re.search('![012]', cond) != None:
+                cond = re.sub('!([012])', ope.m_neg, cond)
             while re.search('[012]\+[012]', cond) != None:
                 cond = re.sub('([012])\+([012])', ope.m_and, cond)
             while re.search('[012]\^[012]', cond) != None:
@@ -167,18 +158,23 @@ class Input:
                 cond = re.sub('\(([012])\)', r'\1', cond)
         #error
         if tmp == cond or (cond != '1' and cond != '2' and cond != '0') :
-            exit_m("could not compute the condition '{:s}'".format(bckup))
+            ut.exit_m("could not compute the condition '{:s}'".format(bckup))
         return int(cond)
 
+def test_compute_condition(input):
+    print("intermediary results:")
+    for rule in input.rules:
+        cond = rule[0]
+        result = input.compute_condition(cond)
+        print("{:s}\t= {:d}".format(cond, result))
 
 def main():
     import parse as prs
     input = prs.get_parsing()
-    input.print()
-    input.check_logic_format()
     input.check_logic_format()
     input.setFacts()
-    input.compute_condition('(A+B+F+H)|C+D')
+    test_compute_condition(input)
+    
     #input.backwardChaining()
 if __name__ == '__main__':
     main()
