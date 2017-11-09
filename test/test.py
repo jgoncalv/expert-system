@@ -54,6 +54,7 @@ for arg in args:
             ok += 1
         else:
             print("{:s} : \033[31mKO\033[0m".format(arg))
+        print()
     else:
         print("File '{:s}' not found".format(arg))
 print("\n[{:d}/{:d}] tests passed".format(ok, len(args)))
