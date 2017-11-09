@@ -25,8 +25,7 @@ def ini_options(argv):
 
 def main():
     argv = ini_options(sys.argv)
-    rules, inital, queries = parse.get_parsing(argv)
-    graph = Graph(rules, initial, queries)
+    graph = parse.get_parsing(argv)
     if OPT_T == 1:
         test_compute_condition(graph)
     for q in graph.queries:

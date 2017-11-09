@@ -67,7 +67,8 @@ def parse_content(content):
                 ut.exit_m("unwanted character on the question line")
             if len(content) != tmp +1:
                 ut.exit_m("the question line should be the last line of input")
-    return rules, ini, ask
+    input = Graph(rules, ini, ask)
+    return(input)
 
 def get_parsing(argv):
     if len(argv) == 1:
