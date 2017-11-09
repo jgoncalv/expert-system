@@ -169,7 +169,6 @@ class Graph:
                 self.objectivesFacts.remove(fact)
                 self.nodeChecked.append(fact)
 
-
         # Maintenant qu'on a la liste il faut résoudre les équations de chaque facts en partant du bas de la liste
         #
         # /!\ MESSAGE : Il faut faire tourner en boucle dans la liste d'objectif pour résoudre les équations et trouvé au moins 1 true
