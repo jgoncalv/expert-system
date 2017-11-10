@@ -1,5 +1,4 @@
 import re
-import ope
 import utils as ut
 """
     NOUVEAU GRAPH
@@ -110,17 +109,17 @@ class Graph:
         # Les facts true dans ini
         for c in self.initial:
             if c not in self.facts:
-                self.facts[c] = 1
+                self.facts[c] = True
         # Les facts False dans les rules
         for i, lst in enumerate(self.rules):
             for j, tab in enumerate(lst):
                 for c in tab:
                     if c.isalpha() and c.isupper() and c not in self.facts:
-                        self.facts[c] = 0
+                        self.facts[c] = False
         # Les facts False dans ask
         for c in self.queries:
             if c not in self.facts:
-                self.facts[c] = 0
+                self.facts[c] = False
 
     # On créer les noeud ruleNodes et factNodes
     def createNodes(self):
@@ -147,7 +146,7 @@ class Graph:
                     if factNode is fact:
                         factNode.rules.append(rule)
                 for fact in rule.firstFacts:
-                    if (factNode is fact) and (rule.rule[3] == '<=>'):
+                    if (factNode is fact) and (rule.rule[2] == '<=>'):
                         factNode.rules.append(rule)
 
     # On créer le nouveau graph selon les queries
@@ -159,41 +158,42 @@ class Graph:
 
     # Vérifie si il n'est pas déjà dans la liste et l'ajoute
     def addNodeCheck(self, fact):
+        isIn = False
         for n in self.nodeChecked:
-            if n is not fact:
-                self.nodeChecked.append(fact)
+            if n is fact:
+                isIn = True
+                break
+        if isIn == False:
+            self.nodeChecked.append(fact)
+
     '''
         Permet de réaliser une liste d'objectif selon si un noeud fact est true ou non
         et tente de résoudre les rules en prenant en compte 
     '''
     def backwardChaining(self):
 
-        # On rajoute les facts true dans nodeChecked
+        #self.checkInconsistency()
+
+        # On rajoute dans nodeChecked les facts qui n'ont pas de rules
         for fact in self.factNodes:
-            if self.facts[fact.fact] == 1:
+            if not fact.rules or self.facts[fact.fact] == True:
                 self.addNodeCheck(fact)
 
-        # On rajoute les nouveau objectifs récursivement
+        # On rajoute les nouveaux objectifs récursivement
         for fact in self.graph:
-            if self.facts[fact.fact] != 1:
+            if fact not in self.nodeChecked:
                 self.objectivesFacts.append(fact)
                 self.getObjectivesRecursiveRules(fact.rules)
-            else:
-                self.addNodeCheck(fact)
 
-        # On enlève de la liste des objectif les facts qui n'ont pas de rules
-        for fact in self.objectivesFacts:
-            if not fact.rules:
-                self.objectivesFacts.remove(fact)
-                self.addNodeCheck(fact)
+        #self.checkInconsistency()
 
         # Maintenant qu'on a la liste il faut résoudre les équations de chaque facts en partant du bas de la liste
         while (self.objectivesFacts):
             i = len(self.objectivesFacts) - 1
             while (i >= 0 and self.objectivesFacts):
                 res = self.resolve(self.objectivesFacts[i])
-                self.checkFactRulesInconsistency(self.objectivesFacts[i])
-                if res == 1:
+                #self.checkInconsistency()
+                if res == True:
                     # On a trouvé un true donc on recommence du début
                     i = len(self.objectivesFacts) - 1
                 elif i == 0:
@@ -204,51 +204,73 @@ class Graph:
                     self.objectivesFacts.remove(f)
                 else:
                     i -= 1
-        """
-            ICI IL Y A DU TAFF
-        """
-        # On regarde tous les facts pour savoir si il y en a qui n'ont pas été vérifier
-        for k in self.facts.keys():
-            for fact in self.factNodes:
-                if fact.fact is k:
-                    if fact not in self.nodeChecked:
-                        print("Il y a des noeuds qui ne sont pas demandés mais qu'ils faut vérifier : ", end='')
-                        print(fact.fact)
-        """
-            FIN DU TAFF
-        """
 
-        # On regarde si il y a une incoherence entre differete regle lier a une regle
-        def checkFactRulesInconsistency(self, rules):
-            dic = {}
-            for fact in nodeChecked:
-                if fact.fact in self.facts.keys():
-                    print("oui {} {}".format(fact.fact, self.fact.keys()))
-            #for rule in rules:
+    # On regarde si il y a une incoherence entre differete regle lier a une regle
+    def checkInconsistency(self):
+        dic = self.getFactUnknown()
+        for fact in self.factNodes:
+            self.computeCondition(fact.rules, dic)
 
+    def getFactUnknown(self):
+        dic = {}
+        for fact in self.nodeChecked:
+            if fact.fact in self.facts.keys():
+                dic[fact.fact] = self.facts[fact.fact]
 
-###
-### JEAN SOUI ICI
-###
+        for key, value in self.facts.items():
+            if key not in dic.keys() and value == True:
+                dic[key] = value
+
+        for key, value in self.facts.items():
+            if key not in dic.keys() and value == False:
+                dic[key] = None
+        return dic
+
+    def computeCondition(self, rules, dic):
+        r1 = False
+        r2 = False
+        for rule in rules:
+            r1 = self.compute(rule.rule[0], dic)
+            r2 = self.compute(rule.rule[1], dic)
+            if r1 != r2 and r1 != None and r2 != None:
+                exit("Il y a une incoherence. {} pour {}.".format((x.rule for x in rules), dic))
+
+    def compute(self, cond, dic):
+        lst = list(cond)
+        for i, c in enumerate(lst):
+            if c in dic.keys():
+                lst[i] = str(dic[c])
+            elif c == '+':
+                lst[i] = "and"
+            elif c == '|':
+                lst[i] = "or"
+            elif c == '^':
+                lst[i] = "!="
+            elif c == '!':
+                lst[i] = str("not")
+            else:
+                lst[i] = c
+        s = ' '.join(lst)
+        return eval(s)
 
     def resolve(self, fact):
         for rule in fact.rules:
+            dic = self.getFactUnknown()
             if len(rule.rule[1]) > 1:
-                #print("Plus d'un facts impliqué il faut faire des vérifications")
-                a = 1
+                res = self.compute(rule.rule[0], dic)
+                print(rule.rule)
+                print(dic)
+                if res != None:
+                    res2 = self.compute(rule.rule[1], dic)
             else:
                 # on exécute les rule jusqu'à avoir true
-                res = self.compute_condition(rule.rule[0])
-                if res == 1:
-                    self.facts[fact.fact] = 1
+                res = self.compute(rule.rule[0], dic)
+                if res == True:
+                    self.facts[fact.fact] = True
                     self.objectivesFacts.remove(fact)
-                    return 1
-        return 0
-
-###
-### FIN JEAN SOUI ICI
-###
-        
+                    return True
+        return False
+  
     def getObjectivesRecursiveRules(self, rules):
         for rule in rules:
             self.getObjectivesRecursiveFacts(rule.firstFacts)
@@ -256,46 +278,16 @@ class Graph:
 
     def getObjectivesRecursiveFacts(self, facts):
         for fact in facts:
-            if self.facts[fact.fact] != 1:
-                if fact not in self.objectivesFacts:
-                    self.objectivesFacts.append(fact)
-                    self.getObjectivesRecursiveRules(fact.rules)
-
-    #return 0, 1 or 2 according to the current facts
-    def compute_condition(self, cond):
-        #if computing fails
-        bckup = cond
-        #replace by current facts
-        s = list(cond)
-        for i, l in enumerate(s):
-            if l >= 'A' and l <= 'Z':
-                s[i] = str(self.facts.get(l))
-        cond = "".join(s)
-        tmp = ''
-        #compute
-        while len(cond) > 1 and tmp != cond:
-            tmp = cond
-            while re.search('![012]', cond) != None:
-                cond = re.sub('!([012])', ope.m_neg, cond)
-            while re.search('[012]\+[012]', cond) != None:
-                cond = re.sub('([012])\+([012])', ope.m_and, cond)
-            while re.search('[012]\^[012]', cond) != None:
-                cond = re.sub('([012])\^([012])', ope.m_xor, cond)
-            while re.search('[012]\|[012]', cond) != None:
-                cond = re.sub('([012])\|([012])', ope.m_or, cond)
-            while re.search('\([012]\)', cond) != None:
-                cond = re.sub('\(([012])\)', r'\1', cond)
-        #error
-        if tmp == cond or (cond != '1' and cond != '2' and cond != '0') :
-            ut.exit_m("could not compute the condition '{:s}'".format(bckup))
-        return int(cond)
+            if fact not in self.nodeChecked and fact not in self.objectivesFacts:
+                self.objectivesFacts.append(fact)
+                self.getObjectivesRecursiveRules(fact.rules)
 
 
 """
     MAIN DE TEST
 """
 def main():
-    graph = Graph([['B', 'A', '<=>'], ['C', 'A', '=>']], '', 'A')
+    graph = Graph([['A+B', 'C', '=>'], ['C+D', 'E+A', '=>'], ['E+C', 'A', '=>'], ['D+E', 'B', '=>']], 'CABD', 'E')
     for q in graph.queries:
         res = graph.facts[q]
         if res == 1:
