@@ -76,7 +76,8 @@ class Graph:
     #check the logic format of operators and brackets
     def check_logic_format(self):
         for i, rule in enumerate(self.rules):
-            for side in rule:
+            r = rule[:2]
+            for side in r:
                 #no unwanted character
                 #unwanted characters before '+^|'
                 #unwanted characters after '+^|'
