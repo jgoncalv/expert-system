@@ -41,10 +41,7 @@ def parse_content(content):
             if re.search('[<=>]', s) != None:
                 ut.exit_m("unwanted character on line {:d}".format(i+1))
         #append the rules
-        rules.append([split[0], split[1]])
-        #two rules in this case
-        if sign == '<=>':
-            rules.append([split[1], split[0]])
+        rules.append([split[0], split[1], sign])
     #case of no initialization and questions
     ini = ''
     ask = ''
