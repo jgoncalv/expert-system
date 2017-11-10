@@ -146,6 +146,9 @@ class Graph:
                 for fact in rule.secondFacts:
                     if factNode is fact:
                         factNode.rules.append(rule)
+                for fact in rule.firstFacts:
+                    if (factNode is fact) and (rule.rule[3] == '<=>'):
+                        factNode.rules.append(rule)
 
     # On créer le nouveau graph selon les queries
     def createQuerieGraph(self):
@@ -188,7 +191,9 @@ class Graph:
         while (self.objectivesFacts):
             i = len(self.objectivesFacts) - 1
             while (i >= 0 and self.objectivesFacts):
-                if self.resolve(self.objectivesFacts[i]) == 1:
+                res = self.resolve(self.objectivesFacts[i])
+                self.checkFactRulesInconsistency(self.objectivesFacts[i])
+                if res == 1:
                     # On a trouvé un true donc on recommence du début
                     i = len(self.objectivesFacts) - 1
                 elif i == 0:
@@ -213,6 +218,15 @@ class Graph:
             FIN DU TAFF
         """
 
+        # On regarde si il y a une incoherence entre differete regle lier a une regle
+        def checkFactRulesInconsistency(self, rules):
+            dic = {}
+            for fact in nodeChecked:
+                if fact.fact in self.facts.keys():
+                    print("oui {} {}".format(fact.fact, self.fact.keys()))
+            #for rule in rules:
+
+
 ###
 ### JEAN SOUI ICI
 ###
@@ -220,7 +234,8 @@ class Graph:
     def resolve(self, fact):
         for rule in fact.rules:
             if len(rule.rule[1]) > 1:
-                print("Plus d'un facts impliqué il faut faire des vérifications")
+                #print("Plus d'un facts impliqué il faut faire des vérifications")
+                a = 1
             else:
                 # on exécute les rule jusqu'à avoir true
                 res = self.compute_condition(rule.rule[0])
@@ -280,7 +295,7 @@ class Graph:
     MAIN DE TEST
 """
 def main():
-    graph = Graph([['B', 'A'], ['C', 'A']], '', 'A')
+    graph = Graph([['B', 'A', '<=>'], ['C', 'A', '=>']], '', 'A')
     for q in graph.queries:
         res = graph.facts[q]
         if res == 1:
