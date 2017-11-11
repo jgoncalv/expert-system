@@ -11,6 +11,7 @@ def check_solution(arg, response):
     ok = 0
     ans = ''
     lines = response.split("\n")
+    nb = len(lines)
     for line in lines:
         if re.search("^[A-Z] is true$", line) != None:
             ans = line[0] + '=1'
@@ -28,10 +29,10 @@ def check_solution(arg, response):
                     content = content.replace(" ", "")
                     content = content.split("\n")
                     if ans in content:
-                        ok = 1
+                        ok += 1
             except FileNotFoundError:
                 print("no solution file, yet...")
-        return ok 
+        return ok == nb
 
 def main():
     if not os.path.isfile('../Expert_System.py'):
