@@ -273,15 +273,26 @@ class Graph:
                 all.append(poss + r)
             j += 1
         return all
-         
+   
+    #if there is an operator in the right side of a rule, prompt a choice to the user
     def user_choice(self, rule, res, unknown, perm):
-        #print("'{:s}' is {}, for '{:s}' to be {} you can choose between:")
+        print("{:s} {:s} {:s}".format(rule[0], rule[2], rule[1]))
+        print("'{:s}' is {}, for '{:s}' to be {} you can choose between:".format(rule[0], res, rule[1], res))
         for n, p in enumerate(perm):
             opt = ''
             for i, f in enumerate(p):
-                opt += ' {} is {} &'
-            #print("{:d}) {} is {}")
+                opt += ' {} is {} &'.format(unknown[i], f)
+            if opt:
+                opt = opt[:-1]
+            print("{:d}){:s}".format(n + 1, opt))
+        nb = ''
+        while nb.isdigit() != True or int(nb) <= 0 or int(nb) > len(perm):
+            nb = input('Enter the number of an option: ')
+        nb = int(nb)
+        chosen_opt = perm[nb - 1]
+        return chosen_opt
 
+    #test all options that could fit the final value of the right side of the rule
     def test_all(self, res, rule, dic):
         unknown = []
         perm = []
@@ -296,16 +307,22 @@ class Graph:
             if res == self.compute(cond, dic):
                 perm.append(p)
         if len(perm) == 0:
-            ut.exit_m("'{:s}' is {} and '{:s}' cannot be {}".format(rule[0], res, cond, res))
+            if res == True:
+                ut.exit_m("Incoherence: '{:s}' is {} and '{:s}' cannot be {}".format(rule[0], res, cond, res))
+            else:
+                return False
         elif len(perm) == 1:
-            for i, v in  enumerate(perm[0]):
-                l = unknown[i]
-                self.facts[l] = v
+            chosen_opt = perm[0]
         else:
-            p = self.user_choice(rule, res, unknown, perm)
-        #print(cond, ' is ', res)
-        #print(perm)
-        exit()
+            chosen_opt = self.user_choice(rule, res, unknown, perm)
+        for i, v in  enumerate(chosen_opt):
+            l = unknown[i]
+            self.facts[l] = v
+            for fact in self.objectivesFacts:
+                if fact.fact == l:
+                    self.objectivesFacts.remove(fact)
+                    self.addNodeCheck(fact)
+        return True
 
     def resolve(self, fact):
         for rule in fact.rules:
@@ -313,8 +330,9 @@ class Graph:
             if len(rule.rule[1]) > 1:
                 res = self.compute(rule.rule[0], dic)
                 if res != None:
-                    self.test_all(res, rule.rule, dic)
                     res2 = self.compute(rule.rule[1], dic)
+                    if res2 == None and self.test_all(res, rule.rule, dic) == True:
+                        return True
             else:
                 # on exécute les rule jusqu'à avoir true
                 res = self.compute(rule.rule[0], dic)
