@@ -172,11 +172,12 @@ class Graph:
     '''
     def backwardChaining(self):
 
-        #self.checkInconsistency()
+        self.checkInconsistency()
 
         # On rajoute dans nodeChecked les facts qui n'ont pas de rules
         for fact in self.factNodes:
-            if not fact.rules or self.facts[fact.fact] == True:
+            #if not fact.rules ''' or self.facts[fact.fact] == True''':
+            if not fact.rules:
                 self.addNodeCheck(fact)
 
         # On rajoute les nouveaux objectifs récursivement
@@ -185,14 +186,14 @@ class Graph:
                 self.objectivesFacts.append(fact)
                 self.getObjectivesRecursiveRules(fact.rules)
 
-        #self.checkInconsistency()
+        self.checkInconsistency()
 
         # Maintenant qu'on a la liste il faut résoudre les équations de chaque facts en partant du bas de la liste
         while (self.objectivesFacts):
             i = len(self.objectivesFacts) - 1
             while (i >= 0 and self.objectivesFacts):
                 res = self.resolve(self.objectivesFacts[i])
-                #self.checkInconsistency()
+                self.checkInconsistency()
                 if res == True:
                     # On a trouvé un true donc on recommence du début
                     i = len(self.objectivesFacts) - 1
@@ -216,24 +217,30 @@ class Graph:
         for fact in self.nodeChecked:
             if fact.fact in self.facts.keys():
                 dic[fact.fact] = self.facts[fact.fact]
-
         for key, value in self.facts.items():
-            if key not in dic.keys() and value == True:
-                dic[key] = value
-
-        for key, value in self.facts.items():
-            if key not in dic.keys() and value == False:
-                dic[key] = None
+            if key not in dic.keys():
+                if value == True:
+                    dic[key] = value
+                elif value == False:
+                    dic[key] = None
         return dic
 
     def computeCondition(self, rules, dic):
-        r1 = False
-        r2 = False
+        r1 = None
+        r2 = None
         for rule in rules:
-            r1 = self.compute(rule.rule[0], dic)
-            r2 = self.compute(rule.rule[1], dic)
+            for c in rule.rule[0]:
+                if c in dic.keys() and dic[c] == True:
+                    r1 = self.compute(rule.rule[0], dic)
+            for c in rule.rule[1]:
+                if c in dic.keys() and dic[c] == True:
+                    r2 = self.compute(rule.rule[1], dic)
             if r1 != r2 and r1 != None and r2 != None:
-                exit("Il y a une incoherence. {} pour {}.".format((x.rule for x in rules), dic))
+                tab = []
+                for x in rules:
+                    s = x.rule[0] + x.rule[2] + x.rule[1]
+                    tab.append(s)
+                exit("Il y a une incoherence. {} avec {}.".format(tab, dic))
 
     def compute(self, cond, dic):
         lst = list(cond)
@@ -258,8 +265,6 @@ class Graph:
             dic = self.getFactUnknown()
             if len(rule.rule[1]) > 1:
                 res = self.compute(rule.rule[0], dic)
-                print(rule.rule)
-                print(dic)
                 if res != None:
                     res2 = self.compute(rule.rule[1], dic)
             else:
@@ -287,7 +292,8 @@ class Graph:
     MAIN DE TEST
 """
 def main():
-    graph = Graph([['A+B', 'C', '=>'], ['C+D', 'E+A', '=>'], ['E+C', 'A', '=>'], ['D+E', 'B', '=>']], 'CABD', 'E')
+    #graph = Graph([['A+B', 'C', '=>'], ['C+D', 'E+A', '=>'], ['E+C', 'A', '=>'], ['D+E', 'B', '=>']], 'CAD', 'E')
+    graph = Graph([['A+B', 'C', '=>'], ['D+E', 'A', '=>']], 'CDE', 'C')
     for q in graph.queries:
         res = graph.facts[q]
         if res == 1:
