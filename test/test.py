@@ -11,6 +11,7 @@ def check_solution(arg, response):
     ok = 0
     ans = ''
     lines = response.split("\n")
+    lines = [l for l in lines if l]
     nb = len(lines)
     for line in lines:
         if re.search("^[A-Z] is true$", line) != None:
