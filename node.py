@@ -253,14 +253,64 @@ class Graph:
         s = ' '.join(lst)
         return eval(s)
 
+    #compute recursively all permutations of [False/True] elements in a list of size n
+    def rec_p(self, n):
+        all = []
+        all.append([False] * n)
+        j = 0
+        while j < n:
+            poss = [False] * (j + 1)
+            poss[j] = True
+            rest = self.rec_p(n - (j+1))
+            for r in rest:
+                all.append(poss + r)
+            j += 1
+        return all
+         
+    def user_choice(self, rule, res, unknown, perm):
+        #print("'{:s}' is {}, for '{:s}' to be {} you can choose between:")
+        for n, p in enumerate(perm):
+            opt = ''
+            for i, f in enumerate(p):
+                opt += ' {} is {} &'
+            #print("{:d}) {} is {}")
+
+    def test_all(self, res, rule, dic):
+        unknown = []
+        perm = []
+        cond = rule[1]
+        for l in cond:
+            if l in dic.keys():
+                unknown.append(l)
+        all = self.rec_p(len(unknown))
+        for p in all:
+            for i, v in enumerate(p):
+                dic[unknown[i]] = v
+            if res == self.compute(cond, dic):
+                perm.append(p)
+        if len(perm) == 0:
+            ut.exit_m("'{:s}' is {} and '{:s}' cannot be {}".format(rule[0], res, cond, res))
+        elif len(perm) == 1:
+            for i, v in  enumerate(perm[0]):
+                l = unknown[i]
+                self.facts[l] = v
+        else:
+            p = self.user_choice(rule, res, unknown, perm)
+        #print(cond, ' is ', res)
+        #print(perm)
+        exit()
+
     def resolve(self, fact):
         for rule in fact.rules:
             dic = self.getFactUnknown()
             if len(rule.rule[1]) > 1:
                 res = self.compute(rule.rule[0], dic)
-                print(rule.rule)
-                print(dic)
+                #print(res)
+                #print(rule.rule)
+                #print(dic)
+                #print(rule.rule[1])
                 if res != None:
+                    self.test_all(res, rule.rule, dic)
                     res2 = self.compute(rule.rule[1], dic)
             else:
                 # on exécute les rule jusqu'à avoir true
