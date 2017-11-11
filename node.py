@@ -176,7 +176,6 @@ class Graph:
 
         # On rajoute dans nodeChecked les facts qui n'ont pas de rules
         for fact in self.factNodes:
-            #if not fact.rules ''' or self.facts[fact.fact] == True''':
             if not fact.rules:
                 self.addNodeCheck(fact)
 
@@ -188,10 +187,15 @@ class Graph:
 
         self.checkInconsistency()
 
+        for f in self.factNodes:
+            if self.facts[f.fact] == True or f in self.nodeChecked:
+                print("On sait que {} est {}.".format(f.fact, self.facts[f.fact]))
+
         # Maintenant qu'on a la liste il faut résoudre les équations de chaque facts en partant du bas de la liste
         while (self.objectivesFacts):
             i = len(self.objectivesFacts) - 1
             while (i >= 0 and self.objectivesFacts):
+                self.checkInconsistency()
                 res = self.resolve(self.objectivesFacts[i])
                 self.checkInconsistency()
                 if res == True:
@@ -201,10 +205,13 @@ class Graph:
                     # Comme on a pas trouvé de solution on supprime le dernier fact de la liste
                     l = len(self.objectivesFacts) - 1
                     f = self.objectivesFacts[l]
+                    print("Comme on a pas trouvé de solution nous disons que {} est {}.".format(f.fact, self.facts[f.fact]))
                     self.addNodeCheck(f)
                     self.objectivesFacts.remove(f)
                 else:
                     i -= 1
+
+        self.checkInconsistency()
 
     # On regarde si il y a une incoherence entre differete regle lier a une regle
     def checkInconsistency(self):
@@ -224,6 +231,12 @@ class Graph:
                 elif value == False:
                     dic[key] = None
         return dic
+
+
+    def tryAllResolution(self, dic):
+        cpyObjectives = list(self.objectivesFacts)
+        cpyNodes = list(self.nodeChecked)
+        cpy
 
     def computeCondition(self, rules, dic):
         r1 = None
@@ -293,10 +306,9 @@ class Graph:
         return chosen_opt
 
     #test all options that could fit the final value of the right side of the rule
-    def test_all(self, res, rule, dic):
+    def test_all(self, res, rule, cond, dic):
         unknown = []
         perm = []
-        cond = rule[1]
         for l in cond:
             if l in dic.keys():
                 unknown.append(l)
@@ -308,7 +320,7 @@ class Graph:
                 perm.append(p)
         if len(perm) == 0:
             if res == True:
-                ut.exit_m("Incoherence: '{:s}' is {} and '{:s}' cannot be {}".format(rule[0], res, cond, res))
+                ut.exit_m("Incoherence: '{:s}' is {} and '{:s}' cannot be {}".format(rule.rule, res, cond, res))
             else:
                 return False
         elif len(perm) == 1:
@@ -327,16 +339,28 @@ class Graph:
     def resolve(self, fact):
         for rule in fact.rules:
             dic = self.getFactUnknown()
-            if len(rule.rule[1]) > 1:
+            ruleStr = str("{} {} {}".format(rule.rule[0], rule.rule[2], rule.rule[1]))
+            if rule.rule[2] == '<=>':
+                res = self.compute(rule.rule[0], dic)
+                res2 = self.compute(rule.rule[1], dic)
+                if res != None and res2 != None and res != res2:
+                    exit("Incoherence: Rule = " + rule.rule[0] + rule.rule[2] + rule.rule[1] + "\n Dic = " + dic)
+                elif res == None and res2 != None:
+                    if self.test_all(res2, rule.rule, rule.rule[0], dic) == True:
+                        return True
+                elif res2 == None and res != None:
+                    if self.test_all(res, rule.rule, rule.rule[1], dic) == True:
+                        return True
+            elif len(rule.rule[1]) > 1:
                 res = self.compute(rule.rule[0], dic)
                 if res != None:
                     res2 = self.compute(rule.rule[1], dic)
-                    if res2 == None and self.test_all(res, rule.rule, dic) == True:
+                    if res2 == None and self.test_all(res, rule.rule, rule.rule[1], dic) == True:
                         return True
             else:
-                # on exécute les rule jusqu'à avoir true
                 res = self.compute(rule.rule[0], dic)
                 if res == True:
+                    print("La règle {} implique que {} soit True.".format(ruleStr, fact.fact))
                     self.facts[fact.fact] = True
                     self.objectivesFacts.remove(fact)
                     return True
@@ -358,8 +382,7 @@ class Graph:
     MAIN DE TEST
 """
 def main():
-    #graph = Graph([['A+B', 'C', '=>'], ['C+D', 'E+A', '=>'], ['E+C', 'A', '=>'], ['D+E', 'B', '=>']], 'CAD', 'E')
-    graph = Graph([['A+B', 'C', '=>'], ['D+E', 'A', '=>']], 'CDE', 'C')
+    graph = Graph([['A+B', 'C', '<=>'], ['C+D', 'E', '=>']], 'CDE', 'E')
     for q in graph.queries:
         res = graph.facts[q]
         if res == 1:
@@ -371,3 +394,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+ 
