@@ -181,7 +181,7 @@ class Graph:
 
         # On rajoute les nouveaux objectifs récursivement
         for fact in self.graph:
-            if fact not in self.nodeChecked:
+            if fact not in self.nodeChecked and fact not in self.objectivesFacts:
                 self.objectivesFacts.append(fact)
                 self.getObjectivesRecursiveRules(fact.rules)
 
@@ -250,10 +250,11 @@ class Graph:
                     r2 = self.compute(rule.rule[1], dic)
             if r1 != r2 and r1 != None and r2 != None:
                 tab = []
-                for x in rules:
-                    s = x.rule[0] + x.rule[2] + x.rule[1]
+                fDic = {}
+                for rule in rules:
+                    s = rule.rule[0] + rule.rule[2] + rule.rule[1]
                     tab.append(s)
-                exit("Il y a une incoherence. {} avec {}.".format(tab, dic))
+                ut.exit_m("Contradiction between {} knowing {}.".format(tab, dic))
 
     def compute(self, cond, dic):
         lst = list(cond)
@@ -289,7 +290,6 @@ class Graph:
    
     #if there is an operator in the right side of a rule, prompt a choice to the user
     def user_choice(self, ruleStr, cond, res, unknown, perm):
-        print(ruleStr)
         print("'{:s}' is {}, for '{:s}' to be {} you can choose between:".format(ruleStr, res, cond, res))
         for n, p in enumerate(perm):
             opt = ''
@@ -324,7 +324,7 @@ class Graph:
             else:
                 return False
         elif len(perm) == 1:
-            ut.verbose("")
+            ut.verbose("Only one combination is possible")
             chosen_opt = perm[0]
         else:
             if ut.OPT_C == 0:
@@ -347,7 +347,7 @@ class Graph:
                 res = self.compute(rule.rule[0], dic)
                 res2 = self.compute(rule.rule[1], dic)
                 if res != None and res2 != None and res != res2:
-                    exit("Incoherence: Rule = " + rule.rule[0] + rule.rule[2] + rule.rule[1] + "\n Dic = " + dic)
+                    ut.exit_m("Incoherence: Rule = " + rule.rule[0] + rule.rule[2] + rule.rule[1] + "\n Dic = " + dic)
                 elif res == None and res2 != None:
                     if self.test_all(res2, ruleStr, rule.rule[0], dic) == True:
                         return True
@@ -374,6 +374,6 @@ class Graph:
 
     def getObjectivesRecursiveFacts(self, facts):
         for fact in facts:
-            if fact not in self.nodeChecked and fact not in self.objectivesFacts:
+            if (fact not in self.nodeChecked) and (fact not in self.objectivesFacts):
                 self.objectivesFacts.append(fact)
                 self.getObjectivesRecursiveRules(fact.rules)

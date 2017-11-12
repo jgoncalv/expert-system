@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 def exit_m(message):
     print(message)
-    exit()
+    exit(0)
 
 def ini_options(argv):
     global OPT_C
