@@ -13,8 +13,6 @@ def test_compute_condition(graph):
 def main():
     argv = ut.ini_options(sys.argv)
     graph = parse.get_parsing(argv)
-    if ut.OPT_T == 1:
-        test_compute_condition(graph)
     for q in graph.queries:
         res = graph.facts[q]
         if res == 1:

@@ -189,7 +189,7 @@ class Graph:
 
         for f in self.factNodes:
             if self.facts[f.fact] == True or f in self.nodeChecked:
-                print("On sait que {} est {}.".format(f.fact, self.facts[f.fact]))
+                ut.verbose("On sait que {} est {}.".format(f.fact, self.facts[f.fact]))
 
         # Maintenant qu'on a la liste il faut résoudre les équations de chaque facts en partant du bas de la liste
         while (self.objectivesFacts):
@@ -205,7 +205,7 @@ class Graph:
                     # Comme on a pas trouvé de solution on supprime le dernier fact de la liste
                     l = len(self.objectivesFacts) - 1
                     f = self.objectivesFacts[l]
-                    print("Comme on a pas trouvé de solution nous disons que {} est {}.".format(f.fact, self.facts[f.fact]))
+                    ut.verbose("Comme on a pas trouvé de solution nous disons que {} est {}.".format(f.fact, self.facts[f.fact]))
                     self.addNodeCheck(f)
                     self.objectivesFacts.remove(f)
                 else:
@@ -362,7 +362,7 @@ class Graph:
             else:
                 res = self.compute(rule.rule[0], dic)
                 if res == True:
-                    print("La règle {} implique que {} soit True.".format(ruleStr, fact.fact))
+                    ut.verbose("La règle {} implique que {} soit True.".format(ruleStr, fact.fact))
                     self.facts[fact.fact] = True
                     self.objectivesFacts.remove(fact)
                     return True
