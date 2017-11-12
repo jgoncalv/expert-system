@@ -33,7 +33,7 @@ def check_solution(arg, response):
                         ok += 1
             except FileNotFoundError:
                 print("no solution file, yet...")
-        return ok == nb
+    return ok == nb
 
 def main():
     if not os.path.isfile('../Expert_System.py'):
