@@ -13,10 +13,10 @@ def ini_options(argv):
             for l in arg[1:]:
                 if l == 'v':
                     OPT_V = 1
-                if l == 'c':
+                elif l == 'c':
                     OPT_C = 1
                 else:
-                    print("unknow option '{:s}'".format(l))
+                    print("unknown option '{:s}'".format(l))
     return [arg for arg in argv if arg[0] != '-']
 
 def verbose(message):

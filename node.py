@@ -189,7 +189,7 @@ class Graph:
 
         for f in self.factNodes:
             if self.facts[f.fact] == True or f in self.nodeChecked:
-                ut.verbose("On sait que {} est {}.".format(f.fact, self.facts[f.fact]))
+                ut.verbose("We know that {} is {}.".format(f.fact, self.facts[f.fact]))
 
         # Maintenant qu'on a la liste il faut résoudre les équations de chaque facts en partant du bas de la liste
         while (self.objectivesFacts):
@@ -205,7 +205,7 @@ class Graph:
                     # Comme on a pas trouvé de solution on supprime le dernier fact de la liste
                     l = len(self.objectivesFacts) - 1
                     f = self.objectivesFacts[l]
-                    ut.verbose("Comme on a pas trouvé de solution nous disons que {} est {}.".format(f.fact, self.facts[f.fact]))
+                    ut.verbose("No solution found, let's assume that {} is {}.".format(f.fact, self.facts[f.fact]))
                     self.addNodeCheck(f)
                     self.objectivesFacts.remove(f)
                 else:
@@ -288,9 +288,9 @@ class Graph:
         return all
    
     #if there is an operator in the right side of a rule, prompt a choice to the user
-    def user_choice(self, rule, res, unknown, perm):
-        print("{:s} {:s} {:s}".format(rule[0], rule[2], rule[1]))
-        print("'{:s}' is {}, for '{:s}' to be {} you can choose between:".format(rule[0], res, rule[1], res))
+    def user_choice(self, ruleStr, cond, res, unknown, perm):
+        print(ruleStr)
+        print("'{:s}' is {}, for '{:s}' to be {} you can choose between:".format(ruleStr, res, cond, res))
         for n, p in enumerate(perm):
             opt = ''
             for i, f in enumerate(p):
@@ -306,7 +306,7 @@ class Graph:
         return chosen_opt
 
     #test all options that could fit the final value of the right side of the rule
-    def test_all(self, res, rule, cond, dic):
+    def test_all(self, res, ruleStr, cond, dic):
         unknown = []
         perm = []
         for l in cond:
@@ -320,15 +320,16 @@ class Graph:
                 perm.append(p)
         if len(perm) == 0:
             if res == True:
-                ut.exit_m("Incoherence: '{:s}' is {} and '{:s}' cannot be {}".format(rule.rule, res, cond, res))
+                ut.exit_m("Incoherence: '{:s}' is {} and '{:s}' cannot be {}".format(ruleStr, res, cond, res))
             else:
                 return False
         elif len(perm) == 1:
+            ut.verbose("")
             chosen_opt = perm[0]
         else:
             if ut.OPT_C == 0:
                return False
-            chosen_opt = self.user_choice(rule, res, unknown, perm)
+            chosen_opt = self.user_choice(ruleStr, cond, res, unknown, perm)
         for i, v in  enumerate(chosen_opt):
             l = unknown[i]
             self.facts[l] = v
@@ -348,21 +349,19 @@ class Graph:
                 if res != None and res2 != None and res != res2:
                     exit("Incoherence: Rule = " + rule.rule[0] + rule.rule[2] + rule.rule[1] + "\n Dic = " + dic)
                 elif res == None and res2 != None:
-                    if self.test_all(res2, rule.rule, rule.rule[0], dic) == True:
+                    if self.test_all(res2, ruleStr, rule.rule[0], dic) == True:
                         return True
                 elif res2 == None and res != None:
-                    if self.test_all(res, rule.rule, rule.rule[1], dic) == True:
+                    if self.test_all(res, ruleStr, rule.rule[1], dic) == True:
                         return True
             elif len(rule.rule[1]) > 1:
                 res = self.compute(rule.rule[0], dic)
-                if res != None:
-                    res2 = self.compute(rule.rule[1], dic)
-                    if res2 == None and self.test_all(res, rule.rule, rule.rule[1], dic) == True:
-                        return True
+                if res != None and self.test_all(res, ruleStr, rule.rule[1], dic) == True:
+                    return True
             else:
                 res = self.compute(rule.rule[0], dic)
                 if res == True:
-                    ut.verbose("La règle {} implique que {} soit True.".format(ruleStr, fact.fact))
+                    ut.verbose("Rule {} implies that {} is True.".format(ruleStr, fact.fact))
                     self.facts[fact.fact] = True
                     self.objectivesFacts.remove(fact)
                     return True
