@@ -314,6 +314,8 @@ class Graph:
         elif len(perm) == 1:
             chosen_opt = perm[0]
         else:
+            if ut.OPT_C == 0:
+               return False
             chosen_opt = self.user_choice(rule, res, unknown, perm)
         for i, v in  enumerate(chosen_opt):
             l = unknown[i]
