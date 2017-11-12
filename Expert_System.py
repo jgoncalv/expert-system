@@ -1,6 +1,7 @@
 import parse
 from node import Graph
 import sys
+import utils as ut
 
 def test_compute_condition(graph):
     print("intermediary results:")
@@ -9,24 +10,10 @@ def test_compute_condition(graph):
         result = graph.compute_condition(cond)
         print("{:s}\t= {:d}".format(cond, result))
 
-def ini_options(argv):
-    global OPT_T
-    OPT_T = 0
-    argv = [arg for arg in argv if arg]
-    for arg in argv:
-        if arg[0] == '-':
-            for l in arg[1:]:
-                if l == 't':
-                    OPT_T = 1
-                else:
-                    print("unknow option '{:s}'".format(l))
-    return [arg for arg in argv if arg[0] != '-']
-
-
 def main():
-    argv = ini_options(sys.argv)
+    argv = ut.ini_options(sys.argv)
     graph = parse.get_parsing(argv)
-    if OPT_T == 1:
+    if ut.OPT_T == 1:
         test_compute_condition(graph)
     for q in graph.queries:
         res = graph.facts[q]
