@@ -1,8 +1,8 @@
+#!/usr/bin/python3
 import re
 import utils as ut
-"""
-    NOUVEAU GRAPH
-"""
+
+
 class Fact:
     def __init__(self, fact):
         self.fact = fact
@@ -377,22 +377,3 @@ class Graph:
             if fact not in self.nodeChecked and fact not in self.objectivesFacts:
                 self.objectivesFacts.append(fact)
                 self.getObjectivesRecursiveRules(fact.rules)
-
-
-"""
-    MAIN DE TEST
-"""
-def main():
-    graph = Graph([['A+B', 'C', '<=>'], ['C+D', 'E', '=>']], 'CDE', 'E')
-    for q in graph.queries:
-        res = graph.facts[q]
-        if res == 1:
-            print("{} is true".format(q))
-        elif res == 0:
-            print("{} is false".format(q))
-        else:
-            print("{} is undetermined".format(q))
-
-if __name__ == '__main__':
-    main()
- 

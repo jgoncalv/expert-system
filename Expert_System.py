@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import parse
 from node import Graph
 import sys

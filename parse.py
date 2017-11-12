@@ -1,7 +1,8 @@
-#python3
+#!/usr/bin/python3
 import utils as ut
 import re
 from node import Graph
+
 
 def parse_content(content):
     #get rid of whitespace characters
@@ -64,6 +65,8 @@ def parse_content(content):
                 ut.exit_m("unwanted character on the question line")
             if len(content) != tmp +1:
                 ut.exit_m("the question line should be the last line of input")
+    if len(ask) == 0:
+        ut.exit_m('you should ask a question about facts')
     input = Graph(rules, ini, ask)
     return(input)
 
@@ -81,12 +84,4 @@ def get_parsing(argv):
     except IsADirectoryError:
         ut.exit_m('Is a directory: "' + argv[1] +'"')
     input = parse_content(content)
-    if len(input.rules) == 0:
-        if len(input.ask) == 0:
-            ut.exit_m('you should ask a question about facts')
     return(input)
-
-if __file__ == 'parse.py':
-    input = get_parsing()
-    input.print()
-    input.check_logic_format()

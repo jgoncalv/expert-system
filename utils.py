@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 def exit_m(message):
     print(message)
     exit()
