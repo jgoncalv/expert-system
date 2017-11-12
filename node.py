@@ -205,7 +205,7 @@ class Graph:
                     # Comme on a pas trouvé de solution on supprime le dernier fact de la liste
                     l = len(self.objectivesFacts) - 1
                     f = self.objectivesFacts[l]
-                    ut.verbose("No solution found, let's assume that {} is {}.".format(f.fact, self.facts[f.fact]))
+                    ut.verbose("Therefore {} is {}.".format(f.fact, self.facts[f.fact]))
                     self.addNodeCheck(f)
                     self.objectivesFacts.remove(f)
                 else:

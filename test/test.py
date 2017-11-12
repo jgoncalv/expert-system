@@ -49,7 +49,7 @@ def main():
             print(h)
             with open(arg, 'r') as f:
                 print(f.read())
-            output = subprocess.check_output(["python3", '../Expert_System.py', arg])
+            output = subprocess.check_output(["python3", '../Expert_System.py',  arg])
             output = output.decode("utf-8")
             print(output, end='')
             print('\033[33m{:s}\033[0m'.format((len(h) - 18) * '#'))
